@@ -1,15 +1,52 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
+import { enqueueSnackbar, SnackbarProvider } from "notistack";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Form = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const navigate = useNavigate();
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log("Title:", title);
-    console.log("Description:", description);
+    try {
+      const { data } = await axios.post("http://localhost:8000/api/forms", {
+        title,
+        description,
+      });
+      console.log(data);
+      enqueueSnackbar(data.message, {
+        variant: "success",
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+        autoHideDuration: 3000,
+      });
+    } catch (error) {
+      console.log(error)
+      if(error.response.status === 401) {
+        enqueueSnackbar("Unauthorized user", {
+          variant: "error",
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "center",
+          },
+          autoHideDuration: 3000,
+        });
+        return;
+      }
+      enqueueSnackbar(error.response.data.message, {
+        variant: "error",
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center",
+        },
+        autoHideDuration: 3000,
+      });
+    }
   };
 
   return (
@@ -61,6 +98,7 @@ const Form = () => {
           </form>
         </div>
       </div>
+      <SnackbarProvider />
     </>
   );
 };

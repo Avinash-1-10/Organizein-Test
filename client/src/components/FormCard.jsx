@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const FormCard = ({ id, title, description, type, setReload }) => {
   const [loading, setLoading] = useState(false);
+
   const handleDelete = async () => {
     try {
       setLoading(true);
@@ -33,6 +35,7 @@ const FormCard = ({ id, title, description, type, setReload }) => {
       setLoading(false);
     }
   };
+
   return (
     <>
       <div className='w-[350px] rounded overflow-hidden shadow-lg bg-white p-4 m-4'>
@@ -40,7 +43,11 @@ const FormCard = ({ id, title, description, type, setReload }) => {
           {type === 'admin' ? (
             ''
           ) : (
-            <FaEdit className='text-gray-500 cursor-pointer' />
+            <Link to={`/edit-form/${id}`}>
+              <FaEdit
+                className='text-gray-500 cursor-pointer'
+              />
+            </Link>
           )}
 
           {loading ? (

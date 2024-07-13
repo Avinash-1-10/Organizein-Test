@@ -1,100 +1,126 @@
-import React, { useState } from "react";
-import Navbar from "../components/Navbar";
-import { enqueueSnackbar, SnackbarProvider } from "notistack";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import Navbar from '../components/Navbar';
+import { enqueueSnackbar, SnackbarProvider } from 'notistack';
+import axios from 'axios';
+import { Formik, Form as FormikForm, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
-const Form = () => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const navigate = useNavigate();
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
+const Home = () => {
+  const [loading, setLoading] = useState(false);
+
+  const handleFormSubmit = async (values, { resetForm }) => {
     try {
-      const { data } = await axios.post("http://localhost:8000/api/forms", {
-        title,
-        description,
-      });
+      setLoading(true);
+      const { data } = await axios.post(`${BACKEND_URL}/api/forms`, values);
       enqueueSnackbar(data.message, {
-        variant: "success",
+        variant: 'success',
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center',
         },
         autoHideDuration: 3000,
       });
+      resetForm();
     } catch (error) {
-      console.log(error)
-      if(error.response.status === 401) {
-        enqueueSnackbar("Unauthorized user", {
-          variant: "error",
+      console.log(error);
+      if (error.response.status === 401) {
+        enqueueSnackbar('Unauthorized user', {
+          variant: 'error',
           anchorOrigin: {
-            vertical: "top",
-            horizontal: "center",
+            vertical: 'top',
+            horizontal: 'center',
           },
           autoHideDuration: 3000,
         });
         return;
       }
       enqueueSnackbar(error.response.data.message, {
-        variant: "error",
+        variant: 'error',
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center',
         },
         autoHideDuration: 3000,
       });
+    } finally {
+      setLoading(false);
     }
   };
+
+  const validationSchema = Yup.object({
+    title: Yup.string()
+      .min(5, 'Title must be at least 5 characters long')
+      .required('Title is required'),
+    description: Yup.string()
+      .min(10, 'Description must be at least 10 characters long')
+      .required('Description is required'),
+  });
 
   return (
     <>
       <Navbar />
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-gray-100">
-        <div className="max-w-md w-full bg-white shadow-md rounded-lg p-8">
-          <h2 className="text-2xl font-bold text-center mb-6">
+      <div className='min-h-[calc(100vh-64px)] flex items-center justify-center bg-gray-100'>
+        <div className='max-w-md w-full bg-white shadow-md rounded-lg p-8'>
+          <h2 className='text-2xl font-bold text-center mb-6'>
             Submit Information
           </h2>
-          <form onSubmit={handleFormSubmit}>
-            <div className="mb-4">
-              <label
-                htmlFor="title"
-                className="block text-gray-700 font-medium mb-2"
-              >
-                Title
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <div className="mb-6">
-              <label
-                htmlFor="description"
-                className="block text-gray-700 font-medium mb-2"
-              >
-                Description
-              </label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300"
-            >
-              Submit
-            </button>
-          </form>
+          <Formik
+            initialValues={{ title: '', description: '' }}
+            validationSchema={validationSchema}
+            onSubmit={handleFormSubmit}
+          >
+            {({ isSubmitting }) => (
+              <FormikForm>
+                <div className='mb-4'>
+                  <label
+                    htmlFor='title'
+                    className='block text-gray-700 font-medium mb-2'
+                  >
+                    Title
+                  </label>
+                  <Field
+                    type='text'
+                    id='title'
+                    name='title'
+                    className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
+                  />
+                  <ErrorMessage
+                    name='title'
+                    component='div'
+                    className='text-red-500 text-sm mt-1'
+                  />
+                </div>
+                <div className='mb-6'>
+                  <label
+                    htmlFor='description'
+                    className='block text-gray-700 font-medium mb-2'
+                  >
+                    Description
+                  </label>
+                  <Field
+                    as='textarea'
+                    id='description'
+                    name='description'
+                    className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
+                  />
+                  <ErrorMessage
+                    name='description'
+                    component='div'
+                    className='text-red-500 text-sm mt-1'
+                  />
+                </div>
+                <button
+                  type='submit'
+                  className='w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300 disabled:bg-gray-500'
+                  disabled={loading || isSubmitting}
+                >
+                  Submit
+                </button>
+              </FormikForm>
+            )}
+          </Formik>
         </div>
       </div>
       <SnackbarProvider />
@@ -102,4 +128,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default Home;

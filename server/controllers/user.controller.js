@@ -1,24 +1,24 @@
-import User from "../models/user.model.js";
-import asyncHandler from "../utils/asyncHandler.js";
-import bcrypt from "bcryptjs";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { CustomError } from "../utils/customError.js";
-import { matchPassword } from "../utils/matchPassword.js";
-import generateToken from "../utils/generateToken.js";
-import setCookies from "../utils/setCookies.js";
+import User from '../models/user.model.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import bcrypt from 'bcryptjs';
+import { ApiResponse } from '../utils/ApiResponse.js';
+import { CustomError } from '../utils/customError.js';
+import { matchPassword } from '../utils/matchPassword.js';
+import generateToken from '../utils/generateToken.js';
+import setCookies from '../utils/setCookies.js';
 
 const register = asyncHandler(async (req, res, next) => {
-  const { name, email, password } = req.body; // Destructuring the request body to get user details
+  const { name, email, password, isAdmin } = req.body; // Destructuring the request body to get user details
 
   // Check if all required fields are provided
   if (!name || !email || !password) {
-    return next(new CustomError("All fields are required", 400)); // Return error if any field is missing
+    return next(new CustomError('All fields are required', 400)); // Return error if any field is missing
   }
 
   // Check if the user already exists with the same email
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return next(new CustomError("User already exists", 409)); // Return error if user already exists
+    return next(new CustomError('User already exists', 409)); // Return error if user already exists
   }
 
   // hashing the password
@@ -29,20 +29,21 @@ const register = asyncHandler(async (req, res, next) => {
   const user = await User.create({
     name,
     email,
+    isAdmin,
     password: hashedPassword,
   });
 
   // Return success response with the created user data
   return res
     .status(201)
-    .json(new ApiResponse(201, "User created successfully", user));
+    .json(new ApiResponse(201, 'User created successfully', user));
 });
 
-export const login = asyncHandler(async (req, res, next) => {
+const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return next(new CustomError("All fields are required", 400));
+    return next(new CustomError('All fields are required', 400));
   }
 
   const existingUser = await User.findOne({
@@ -50,12 +51,12 @@ export const login = asyncHandler(async (req, res, next) => {
   });
 
   if (!existingUser) {
-    return next(new CustomError("User does not exist", 404));
+    return next(new CustomError('User does not exist', 404));
   }
 
   const isMatch = await matchPassword(password, existingUser.password);
   if (!isMatch) {
-    return next(new CustomError("Invalid credentials", 401));
+    return next(new CustomError('Invalid credentials', 401));
   }
 
   // Generate JWT token
@@ -65,15 +66,20 @@ export const login = asyncHandler(async (req, res, next) => {
   setCookies(res, token);
 
   const loggedInUser = await User.findById(existingUser._id).select(
-    "-password"
+    '-password'
   );
 
   return res.status(200).json(
-    new ApiResponse(200, "Login successful", {
+    new ApiResponse(200, 'Login successful', {
       user: loggedInUser,
       auth_token: token,
     })
   );
 });
 
-export { register };
+const logout = asyncHandler(async (req, res, next) => {
+  res.clearCookie('auth_token');
+  return res.status(200).json(new ApiResponse(200, 'Logout successful', null));
+});
+
+export { register, login, logout };

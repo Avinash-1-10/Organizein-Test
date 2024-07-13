@@ -13,6 +13,7 @@ const MyForms = lazy(() => import('./pages/MyForms'));
 
 const App = () => {
   const user = JSON.parse(localStorage.getItem('user')) || null;
+  const auth_token = localStorage.getItem('auth_token');
 
   // set credentials true for cookies in axios
   axios.defaults.withCredentials = true;

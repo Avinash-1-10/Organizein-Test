@@ -15,6 +15,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       localStorage.removeItem('user');
+      localStorage.removeItem('auth_token');
       setUser(null);
       setShowMenu(false);
       navigate('/login');

@@ -13,7 +13,15 @@ const MyForms = lazy(() => import('./pages/MyForms'));
 
 const App = () => {
   const user = JSON.parse(localStorage.getItem('user')) || null;
+
+  // set credentials true for cookies in axios
   axios.defaults.withCredentials = true;
+
+  // send token in header with every api
+  const token = localStorage.getItem("auth_token");
+  if (token) {
+    axios.defaults.headers.common["auth_token"] = `Bearer ${token}`;
+  }
   return (
     <BrowserRouter>
       <Suspense fallback={<Loader />}>

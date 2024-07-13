@@ -20,6 +20,7 @@ const Login = () => {
       );
 
       localStorage.setItem('user', JSON.stringify(data.data.user));
+      localStorage.setItem('auth_token', data.data.token);
       enqueueSnackbar(data.message, {
         variant: 'success',
         anchorOrigin: {

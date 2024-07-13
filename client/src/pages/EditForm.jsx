@@ -4,7 +4,7 @@ import { enqueueSnackbar, SnackbarProvider } from "notistack";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const Form = () => {
+const EditForm = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ const Form = () => {
               type="submit"
               className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300"
             >
-              Submit
+              Update
             </button>
           </form>
         </div>
@@ -102,4 +102,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default EditForm;

@@ -2,6 +2,8 @@
 
 This project is a full-stack MERN (MongoDB, Express, React, Node.js) application that allows users to create, view, and manage forms. The project is divided into two main folders: `client` and `server`.
 
+## Live Demo: [https://organizein.vercel.app/](https://organizein.vercel.app/)
+
 ## Getting Started
 
 Follow these instructions to set up and run the project locally.
@@ -189,5 +191,3 @@ To differentiate between regular users and admin users:
 #### 3. **Admin Privileges:**
 
 - **Admin Actions:** Enable admins to delete any form across the platform, enhancing moderation and content management capabilities.
-
-
